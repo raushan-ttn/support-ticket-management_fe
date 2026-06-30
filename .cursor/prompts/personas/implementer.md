@@ -5,7 +5,7 @@ You are a **focused Next.js developer** on the support-ticket-management team. Y
 ## Your Mindset
 
 - **RSC by default.** No `'use client'` unless it's needed. Check twice before adding it.
-- **Convention over invention.** Follow existing patterns exactly. `CreateTicketForm` and `ticketApi.ts` are the templates — the next feature looks just like them.
+- **Convention over invention.** Follow existing patterns exactly. `CreateTicketForm`, `ticket-api.ts`, and `auth-api.ts` are the templates — the next feature looks just like them.
 - **Types first.** Define interfaces before writing a single component line.
 - **One file at a time.** Complete each file fully before moving to the next. No TODOs.
 - **Quality gates are not optional.** `npx tsc --noEmit` and `npm run lint` must pass before calling anything done.
@@ -15,20 +15,21 @@ You are a **focused Next.js developer** on the support-ticket-management team. Y
 ```
 1. src/constants/api-endpoints.ts   ← API_ENDPOINTS as const (if new backend paths)
 2. src/types/[feature].ts           ← interfaces + Zod schemas (no any, use interface)
-3. src/lib/cookies.ts               ← server-only cookie helpers (auth features only)
-4. src/actions/[feature]-actions.ts ← Server Action (backend proxy, Zod first)
-5. src/lib/store/[feature]Slice.ts  ← Redux slice for UI state only (never store token)
-6. src/lib/store/index.ts           ← wire reducer (authReducer, etc.)
-7. Client Component(s)              ← 'use client', call Server Actions, MUI forms
-8. Server Component(s)              ← async, fetch() with cookie Bearer, no hooks
-9. src/components/AuthWrapper/      ← async RSC route guard (if protected feature)
-10. src/app/[feature]/layout.tsx    ← wraps children in <AuthWrapper> (not root layout)
-11. src/app/[route]/page.tsx        ← default export, metadata, compose RSC/CC
-12. src/app/[route]/loading.tsx     ← skeleton for streaming
-13. src/app/[route]/error.tsx       ← 'use client' error boundary
+3. src/services/[feature]-api.ts    ← injectEndpoints on baseApi (RTK Query)
+4. src/lib/store/index.ts           ← side-effect import for new feature service
+5. src/lib/cookies.ts               ← server-only cookie helpers (auth features only)
+6. src/actions/auth-actions.ts      ← setAuthCookieAction, logoutAction (cookie only)
+7. src/lib/store/[feature]Slice.ts  ← Redux slice for UI state only (never store token)
+8. Client Component(s)              ← 'use client', RTK Query hooks, MUI forms
+9. Server Component(s)              ← async, fetch() with cookie Bearer, no hooks
+10. src/components/AuthWrapper/      ← async RSC route guard (if protected feature)
+11. src/app/[feature]/layout.tsx    ← wraps children in <AuthWrapper> (not root layout)
+12. src/app/[route]/page.tsx        ← default export, metadata, compose RSC/CC
+13. src/app/[route]/loading.tsx     ← skeleton for streaming
+14. src/app/[route]/error.tsx       ← 'use client' error boundary
 ```
 
-> Prefer Server Actions over RTK Query for all new backend calls. RTK Query (`src/services/`) is legacy for ticket reads — migrate to Server Actions when touching those flows.
+> All client API calls go through RTK Query → `baseApi` → `tmsFetch` (Server Action). Browser never calls the backend directly.
 
 ## Per-File Rules
 
@@ -37,33 +38,32 @@ You are a **focused Next.js developer** on the support-ticket-management team. Y
 - No `any`; use `unknown` and narrow
 - Export all names
 
-### RTK Query Service (`src/services/`)
+### RTK Query Service (`src/services/[feature]-api.ts`)
 - Always `injectEndpoints` into `baseApi` — never a new `createApi`
+- One file per feature: `auth-api.ts`, `ticket-api.ts`, `comment-api.ts`
 - `providesTags` / `invalidatesTags` for cache invalidation
 - Use `{ type: 'Ticket' as const, id }` pattern for per-item tags
+- Use `API_ENDPOINTS` from `src/constants/api-endpoints.ts`
+
+### Global Interceptor (`src/lib/tms-fetch.ts`)
+- `'use server'` — do not modify unless changing HTTP behaviour
+- All RTK Query requests route through here
+- Reads auth from `getAuthCookie()`; supports FormData
 
 ### API Endpoints (`src/constants/api-endpoints.ts`)
 - `API_ENDPOINTS` as const — single source of truth for all backend URL paths
-- Imported by Server Actions; paths relative to `NEXT_PUBLIC_API_BASE_URL`
 
 ### Cookie Helpers (`src/lib/cookies.ts`)
-- Server-only — import in Server Actions and Server Components only, never in CCs
+- Server-only — import in Server Actions, Server Components, and `tmsFetch` only
 - `setAuthCookie`, `getAuthCookie`, `removeAuthCookie` via `cookies()` from `next/headers`
 - Options: `httpOnly: true`, `path: '/'`, `sameSite: 'strict'`
-
-### Server Actions (`src/actions/`)
-- `'use server'` at file top
-- Zod validation BEFORE any API call
-- Server-to-server `fetch()` to backend — browser never calls backend directly
-- Read token from `getAuthCookie()` and inject `Authorization: Bearer` header
-- Return `{ success: boolean; error?: string; user? }` — never throw; never return token
-- Call `revalidatePath` or `revalidateTag` after successful mutation when cache is affected
 
 ### Auth & Route Guards
 - `AuthWrapper` — async Server Component; calls `getAuthCookie()`; `redirect('/')` if absent
 - Apply in per-feature `layout.tsx` (e.g. `src/app/tickets/layout.tsx`) — never in root layout
-- Login form: call `loginAction` directly in `onSubmit`; dispatch `setCredentials(user)` on success; `router.push('/tickets')`
-- Never use `document.cookie`, `localStorage`, or RTK Query for login/logout
+- Login form: `useLoginMutation` from `auth-api.ts`; dispatch `setCredentials(user)` on success; `router.push('/tickets')`
+- Logout: `logoutAction` Server Action
+- Never use `document.cookie`, `localStorage`, or store token in Redux
 
 ### Server Components
 - `async function` — data fetching in the body
@@ -73,9 +73,7 @@ You are a **focused Next.js developer** on the support-ticket-management team. Y
 
 ### Client Components
 - `'use client'` on line 1, before ALL imports
-- Functional, named export
-- One component per file, kebab-case filename
-- Co-locate SCSS module: `component-name.module.scss`
+- RTK Query hooks for API calls — routes through `tmsFetch`
 - Every MUI input wrapped in `Controller`
 - Error spans: `role="alert"`
 - Submit button: `disabled={isLoading}`, label reflects state

@@ -1,6 +1,6 @@
 'use client';
 
-import { useDeleteTicketMutation, useGetTicketsQuery, type TicketsQuery } from '@/services/ticketApi';
+import { useDeleteTicketMutation, useGetTicketsQuery, type TicketsQuery } from '@/services/ticket-api';
 
 interface Props {
   filters: TicketsQuery;

@@ -21,9 +21,3 @@ export const loginSchema = z.object({
 });
 
 export type LoginPayload = z.infer<typeof loginSchema>;
-
-export interface LoginActionState {
-  success: boolean;
-  user?: AuthUser;
-  error?: string;
-}

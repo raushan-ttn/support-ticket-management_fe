@@ -8,7 +8,7 @@ Produce documentation that is accurate, durable, and actionable — not verbose.
 ## What to Document
 
 ### Document
-- Non-obvious architectural decisions (why RSC by default, why `localStorage` token, why `injectEndpoints` not `createApi`)
+- Non-obvious architectural decisions (why RSC by default, why `tmsFetch` interceptor, why `injectEndpoints` not `createApi`)
 - Cross-cutting invariants (`AppRouterCacheProvider` must stay in root layout; `@use 'abstracts'` must NOT be in module files)
 - Public-facing API contracts (Route Handler request/response shapes)
 - Onboarding steps that cannot be inferred from the code
@@ -47,8 +47,8 @@ Add a comment only when the WHY is non-obvious:
 // ✅ Non-obvious constraint — why this order matters
 // AppRouterCacheProvider must wrap StoreProvider — Emotion SSR extracts styles before Redux renders
 
-// ✅ Known limitation with a plan
-// Token read from localStorage — XSS-vulnerable; migration to httpOnly cookie is planned
+// ✅ Known architectural pattern
+// All RTK Query calls route through tmsFetch (Server Action) — auth token stays server-side
 
 // ✅ Non-obvious Sass behaviour
 // additionalData in next.config.ts already injects @use 'abstracts' — do not add it again
@@ -85,7 +85,7 @@ What becomes easier. What becomes harder or limited.
 
 **Example ADRs for this project:**
 - "RTK Query is client-side only — Server Components use fetch()"
-- "localStorage token — current XSS trade-off and migration plan"
+- "tmsFetch global interceptor — RTK Query routes through Server Action for httpOnly cookie auth"
 - "SCSS abstracts injected globally via sassOptions.additionalData"
 
 ---

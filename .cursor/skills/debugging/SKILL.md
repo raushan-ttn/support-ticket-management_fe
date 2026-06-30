@@ -9,7 +9,7 @@ Systematically locate, understand, and fix bugs without guessing or making unrel
 
 ### 1. Reproduce First
 - Confirm the exact steps to trigger the bug
-- Note: browser, route, auth state (token in localStorage?), whether error is in server terminal or browser console
+- Note: browser, route, auth state (httpOnly cookie present?), whether error is in server terminal or browser console
 - RSC errors appear in the **server terminal**, not the browser console — check both
 
 ### 2. Classify the Bug
@@ -20,55 +20,51 @@ Systematically locate, understand, and fix bugs without guessing or making unrel
 | "Event handlers cannot be passed to Client Component props" | Props | Function prop passed from RSC to CC — receiver must be CC |
 | Hook error ("Rules of Hooks" / "only for Client Components") | Missing directive | Add `'use client'` to the component |
 | Blank page, RSC throws | Server render | **Server terminal** — RSC errors don't appear in browser console |
-| 401 on every API request | Auth token | `localStorage.getItem('token')` is null; check DevTools → Application |
+| 401 on every API request | Auth cookie | `getAuthCookie()` returns undefined; cookie not set after login |
+| Login succeeds but /tickets redirects to / | Cookie timing | `setAuthCookieAction` not awaited in `onQueryStarted`; cookie options wrong |
 | RTK Query returns stale data after mutation | Cache | `invalidatesTags` missing or wrong tag format; check Redux DevTools |
-| Server Action returns unexpected error | Server Action | Zod schema mismatch; `formData.get()` key typo; check action return value |
-| Route Handler 4xx | Route Handler | Zod shape mismatch; wrong content-type; auth header missing |
+| RTK Query mutation fails silently | tmsFetch | Check server terminal for `tmsFetch` errors; verify `API_ENDPOINTS` path |
+| FormData upload fails | Server Action boundary | FormData/File through `tmsFetch` — check Next.js version support |
+| Server Action returns unexpected error | Server Action | Zod schema mismatch; check action return value |
 | `window is not defined` | Server render | Browser API in RSC or at CC module level without guard |
-| SCSS class not applied | SCSS module | Class name typo in `.module.scss`; wrong import path; duplicate `@use 'abstracts'` breaking parse |
-| MUI component crashes in RSC | CC boundary | MUI requires client context; add `'use client'` |
-| `useRouter` / `usePathname` crashes in RSC | Hook in RSC | Use `redirect()` server-side or move hook to a CC |
-| Redirect loop | Routing | Both source and destination route trigger the redirect condition |
+| SCSS class not applied | SCSS module | Class name typo; wrong import path; duplicate `@use 'abstracts'` |
+| Redirect loop | Routing | `AuthWrapper` on root layout or login page |
 
 ### 3. Trace the Data Flow
 
-**Server path** (RSC, Server Actions, Route Handlers):
-```
-Browser request
-  → Next.js router
-  → page.tsx (RSC, async)
-  → fetch(BASE_URL + '/endpoint', cacheOptions)
-  → external API response
-  → serializable props passed to CC children
-```
-Check: Server terminal output, `.next/server/` build artifacts.
-
-**Client path** (Client Components + RTK Query):
+**Client path** (RTK Query → tmsFetch):
 ```
 CC renders → useGetXxxQuery / useXxxMutation
-  → baseApi.prepareHeaders (reads localStorage.getItem('token'))
-  → fetch to external API
+  → baseApi baseQueryFn
+  → tmsFetch (Server Action)
+  → getAuthCookie() → Authorization: Bearer
+  → fetch to backend API
   → RTK Query cache update → component re-renders
 ```
-Check: Browser DevTools → Network tab (confirm Authorization header) → Redux DevTools (confirm cache update).
+Check: Server terminal (tmsFetch errors), Redux DevTools (cache update).
 
 **Auth path**:
 ```
-Login form → RTK Query loginMutation
-  → POST /auth/login → { token, user }
-  → localStorage.setItem('token', response.token)
-  → subsequent requests pick up token via baseApi.prepareHeaders
+LoginForm → useLoginMutation
+  → tmsFetch (skipAuth) → POST /auth/login
+  → onQueryStarted → setAuthCookieAction(token)
+  → dispatch setCredentials(user) → router.push('/tickets')
+  → AuthWrapper reads cookie → renders protected page
 ```
-If 401: check DevTools → Application → Local Storage → `token` key exists and has a value.
+If 401: check DevTools → Application → Cookies → `token` (httpOnly — not readable by JS, but should be listed).
+
+**Server path** (RSC):
+```
+Browser request → page.tsx (RSC, async)
+  → fetch() with Bearer from getAuthCookie()
+  → external API response → serializable props to CC children
+```
 
 ### 4. Read Before Touching
 Read the actual file at the actual line before changing anything.
-Do not assume what the code says — open the file.
 
 ### 5. Fix — Minimal
-Change only what causes the bug.
-Do NOT refactor, rename, or improve nearby code as part of this fix.
-If the fix requires touching more than 3 unrelated files, the root cause is deeper — re-classify.
+Change only what causes the bug. Do NOT refactor nearby code.
 
 ### 6. Verify
 - [ ] Original reproduction steps no longer trigger the bug
@@ -81,21 +77,20 @@ If the fix requires touching more than 3 unrelated files, the root cause is deep
 
 ## Known Gotchas in This Codebase
 
-**RSC / Client boundary:**
-- `window`, `document`, `localStorage` at module level in a CC crash during SSR — guard: `typeof window !== 'undefined'`
-- MUI components require `'use client'` — importing them in an RSC causes a build error
-- `AppRouterCacheProvider` in `src/app/layout.tsx` must remain there — removing it breaks MUI SSR styles
-
-**RTK Query:**
-- Token read from `localStorage.getItem('token')` in `src/services/baseApi.ts` — null → all requests unauthenticated
+**RTK Query + tmsFetch:**
+- All client API calls route through `tmsFetch` — errors may appear in server terminal, not browser Network tab (no direct backend call from browser)
 - `injectEndpoints` shares `baseApi`'s reducer key — no separate reducer to register
-- Cache tags must use `as const`: `{ type: 'Ticket' as const, id }` — plain string `'Ticket'` does not match per-item tags
+- Feature services must be imported in `src/lib/store/index.ts` as side effects
+- Cache tags must use `as const`: `{ type: 'Ticket' as const, id }`
+
+**Auth & cookies:**
+- Token in `httpOnly` cookie via `src/lib/cookies.ts` — invisible to `document.cookie` and client JS
+- `tmsFetch` reads cookie server-side; login uses `skipAuth: true`
+- `setAuthCookieAction` called in `auth-api` `onQueryStarted` — slight delay before cookie is available
 
 **SCSS:**
-- `sassOptions.additionalData` in `next.config.ts` auto-injects `@use 'abstracts' as *;` — adding it manually causes "duplicate @use" parse error
-- Variable names: `$color-gray-900`, `$space-4`, `$font-size-sm` — check `src/styles/abstracts/_variables.scss`
-- Mixins: `@include respond-to(md)`, `@include flex-center` — check `src/styles/abstracts/_mixins.scss`
+- `sassOptions.additionalData` auto-injects `@use 'abstracts' as *;` — adding it manually causes parse error
 
 **Next.js routing:**
 - `params` and `searchParams` in page.tsx are `Promise<...>` in Next.js 16 — must `await` them
-- `error.tsx` MUST be a `'use client'` component — it will fail silently if not
+- `error.tsx` MUST be a `'use client'` component

@@ -15,8 +15,8 @@ Run every check and report status per item. Block release on any failure (report
 `npm run build` (no errors) · `npm run start` — app loads on :3000, no console errors, View Source shows pre-rendered SSR HTML.
 
 ## 3. Auth Flow
-- [ ] Token saved to `localStorage` as `'token'` after login; cleared on logout.
-- [ ] Authed requests send `Authorization: Bearer <token>`; unauthed get 401.
+- [ ] httpOnly cookie set after login via `setAuthCookieAction`; cleared on `logoutAction`.
+- [ ] Authenticated RTK Query requests route through `tmsFetch` with Bearer from cookie; unauthed get 401.
 
 ## 4. Feature Smoke Tests (per changed route)
 - [ ] Happy path end-to-end; loading + error states render (kill API to confirm); forms show success/error feedback.

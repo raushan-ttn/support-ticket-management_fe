@@ -50,9 +50,10 @@ Stack: TypeScript · Next.js 16 App Router · React 19 · Redux Toolkit · RTK Q
 - RTK Query (client-only): live updates/polling, optimistic updates, post-mutation invalidation, user-triggered refetch.
 
 ## RTK Query & Redux
-- Setup: `src/services/baseApi.ts` (`createApi` + `fetchBaseQuery` + Bearer auth), `makeStore()` in `src/lib/store/index.ts`, `StoreProvider` (`'use client'`, store once via `useRef`) in root layout; tag types `Ticket`, `Comment`.
-- Add services via `injectEndpoints` on `baseApi` — never a new `createApi()`; injected endpoints share `baseApi`'s reducer (no new reducer path).
+- Setup: `src/services/baseApi.ts` (`createApi` + custom `baseQueryFn` → `tmsFetch`), `makeStore()` in `src/lib/store/index.ts`, `StoreProvider` (`'use client'`, store once via `useRef`) in root layout; tag types `Ticket`, `Comment`.
+- Global interceptor: `src/lib/tms-fetch.ts` (`'use server'`) — all RTK Query requests route through `tmsFetch`; reads auth token from `getAuthCookie()`; supports GET/POST/PATCH/DELETE + FormData.
+- Add services via `injectEndpoints` on `baseApi` — one file per feature (`auth-api.ts`, `ticket-api.ts`, `comment-api.ts`); never a new `createApi()`; wire endpoints via side-effect imports in `src/lib/store/index.ts`.
 - Cache tags: list queries provide per-item tags + a `LIST` tag; create invalidates `LIST`; update/delete invalidate the item + `LIST`.
 - Use typed `useAppDispatch`/`useAppSelector` everywhere, not raw hooks.
 - Slices for UI state only (auth, toggles, persisted filters); never mirror RTK Query cache — it is the single source of truth for server state.
-- Auth token read from `localStorage` in `baseApi.ts` `prepareHeaders` (XSS risk; planned `httpOnly` cookie migration). Extend that pattern only — no parallel token storage. See `performance-security`.
+- Auth token in `httpOnly` cookie via `src/lib/cookies.ts` — read only in `tmsFetch` and Server Actions; never `localStorage` or `document.cookie`. See `performance-security`.

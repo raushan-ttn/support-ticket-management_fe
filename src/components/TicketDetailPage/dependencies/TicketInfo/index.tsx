@@ -1,6 +1,6 @@
 'use client';
 
-import { useGetTicketByIdQuery, useUpdateTicketMutation, type TicketStatus } from '@/services/ticketApi';
+import { useGetTicketByIdQuery, useUpdateTicketMutation, type TicketStatus } from '@/services/ticket-api';
 
 interface Props {
   ticketId: number;

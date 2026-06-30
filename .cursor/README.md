@@ -37,9 +37,9 @@ The rendering model is the most important architectural concept to understand:
 
 - **Default to Server Components.** No `'use client'` unless you need hooks, event handlers, or browser APIs.
 - **Push the client boundary down.** A page can be a Server Component that renders a Client Component leaf — not the other way around.
-- **Server Actions proxy all backend calls.** Browser never calls the backend directly — eliminates CORS. No Route Handlers for backend proxying.
-- **Auth via httpOnly cookies.** Token set server-side in `src/lib/cookies.ts`; route guards via `AuthWrapper` in per-feature `layout.tsx`.
-- **RTK Query is legacy (client-side only).** Prefer Server Actions for new backend calls; migrate ticket reads/mutations in follow-up.
+- **Server Actions proxy backend calls via `tmsFetch`.** RTK Query hooks call `baseApi` → `tmsFetch` (`'use server'`). Browser never calls the backend directly — eliminates CORS.
+- **Auth via httpOnly cookies.** Token set server-side in `src/lib/cookies.ts`; read by `tmsFetch`; route guards via `AuthWrapper` in per-feature `layout.tsx`.
+- **RTK Query for client API state.** Per-feature services (`auth-api.ts`, `ticket-api.ts`, `comment-api.ts`) inject endpoints into `baseApi`.
 
 ---
 
@@ -129,10 +129,11 @@ You can also `@`-mention them manually to switch mode mid-conversation.
 | Framework | Next.js 16 App Router | RSC by default |
 | Language | TypeScript strict | `@/*` → `./src/*` |
 | UI components | MUI v9 + `@mui/material-nextjs` | `AppRouterCacheProvider` in layout |
-| API path constants | `src/constants/api-endpoints.ts` | `API_ENDPOINTS` as const — used by Server Actions |
-| Backend proxy | Server Actions (`src/actions/*`) | Server-to-server fetch, no CORS |
-| Data fetching (server) | `fetch()` in RSC / Server Actions | Bearer from `getAuthCookie()` |
-| Data fetching (client, legacy) | RTK Query | Migrate to Server Actions |
+| API path constants | `src/constants/api-endpoints.ts` | `API_ENDPOINTS` as const |
+| Global HTTP interceptor | `src/lib/tms-fetch.ts` | `'use server'` — all RTK Query requests |
+| Client data fetching | RTK Query via `baseApi` → `tmsFetch` | Per-feature `*-api.ts` services |
+| Server data fetching | `fetch()` in RSC / Server Actions | Bearer from `getAuthCookie()` |
+| Cookie actions | `src/actions/auth-actions.ts` | `setAuthCookieAction`, `logoutAction` |
 | App state | Redux Toolkit | `authSlice` for user object only (not token) |
 | Forms | react-hook-form + Zod + `Controller` | MUI inputs via Controller |
 | Styles | SCSS Modules + Tailwind v4 | Abstracts auto-injected |

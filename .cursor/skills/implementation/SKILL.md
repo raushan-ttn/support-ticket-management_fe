@@ -13,39 +13,38 @@ A plan has been reviewed and approved (see `../planning/SKILL.md`). Rendering st
 ### 0. API Endpoints (`src/constants/api-endpoints.ts`) — when adding backend paths
 
 ```typescript
+export const API_VERSION = '/api/v1';
 export const API_ENDPOINTS = {
-  AUTH: { LOGIN: '/v1/auth/login', ME: '/v1/auth/me' },
+  AUTH: { LOGIN: `${API_VERSION}/auth/login`, ME: `${API_VERSION}/auth/me` },
   TICKETS: {
-    LIST: '/v1/tickets',
-    BY_ID: (id: number | string) => `/v1/tickets/${id}`,
-    // ...
+    LIST: `${API_VERSION}/tickets`,
+    BY_ID: (id: number | string) => `${API_VERSION}/tickets/${id}`,
+  },
+  COMMENTS: {
+    BY_TICKET: (ticketId: number | string) => `${API_VERSION}/tickets/${ticketId}/comments`,
+    BY_ID: (ticketId: number | string, commentId: number | string) =>
+      `${API_VERSION}/tickets/${ticketId}/comments/${commentId}`,
   },
 } as const;
 ```
 
-- Single source of truth — imported by all Server Actions
+- Single source of truth — imported by all feature services
 - Paths relative to `NEXT_PUBLIC_API_BASE_URL`
 
 ### 1. Types (`src/types/[feature].ts`)
 
 ```typescript
-// ✅ Interface for every shape, no any
 export interface Comment {
   id: number;
   ticketId: number;
   content: string;
   createdAt: string;
 }
-
-export interface CreateCommentPayload {
-  ticketId: number;
-  content: string;
-}
 ```
 
 - `interface` for object shapes, no `any`, export all names
-- Include Zod schemas when used by Server Actions (e.g. `loginSchema`)
-- Re-use existing types from `src/services/ticketApi.ts` where possible
+- Include Zod schemas when used by forms (e.g. `loginSchema` in `src/types/auth.ts`)
+- Re-use existing types from `src/services/ticket-api.ts` where possible
 
 ### 2. Cookie Helpers (`src/lib/cookies.ts`) — auth features only
 
@@ -62,41 +61,89 @@ export async function removeAuthCookie(): Promise<void> { /* ... */ }
 
 - Server-only — never import in Client Components
 - Single place for cookie name and options
+- Read by `tmsFetch` for authenticated API calls
 
-### 3. Server Action (preferred for all backend calls)
+### 3. Global Interceptor (`src/lib/tms-fetch.ts`) — all RTK Query backend calls
 
 ```typescript
-// src/actions/[feature]-actions.ts
 'use server';
-import { API_ENDPOINTS } from '@/constants/api-endpoints';
-import { getAuthCookie, setAuthCookie } from '@/lib/cookies';
+import { getAuthCookie } from '@/lib/cookies';
 
-export async function loginAction(payload: LoginPayload): Promise<LoginActionState> {
-  const parsed = loginSchema.safeParse(payload);
-  if (!parsed.success) return { success: false, error: 'Invalid input' };
-
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL}${API_ENDPOINTS.AUTH.LOGIN}`,
-    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(parsed.data) }
-  );
-  if (!res.ok) return { success: false, error: '...' };
-
-  const { data } = await res.json();
-  await setAuthCookie(data.token);
-  return { success: true, user: data.user }; // never return token
-}
+export async function tmsFetch<T>(path: string, opts?: TmsFetchOptions): Promise<TmsFetchResult<T>>
 ```
 
 Key rules:
-- Server-to-server `fetch()` — browser never calls backend directly
-- Read token via `getAuthCookie()` for authenticated calls; inject `Authorization: Bearer`
-- Zod validation before any API call
-- Return `{ success, error?, user? }` — never throw; never return token
+- `'use server'` at file top — executes fetch on the server
+- Reads token via `getAuthCookie()` and injects `Authorization: Bearer` (unless `skipAuth: true`)
+- Supports GET/POST/PATCH/DELETE + JSON and FormData bodies
+- Returns `{ data }` or `{ error: { status, message } }`
+- Do not call `tmsFetch` directly from components — use RTK Query hooks or Server Actions
 
-### 4. Redux Slice (client UI state only — auth example)
+### 4. RTK Query Feature Service (`src/services/[feature]-api.ts`)
 
 ```typescript
-// src/lib/store/authSlice.ts
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import { baseApi } from '@/services/baseApi';
+
+export const ticketApi = baseApi.injectEndpoints({
+  endpoints: (builder) => ({
+    getTickets: builder.query<TicketsResponse, TicketsQuery | void>({
+      query: (params = {}) => ({
+        url: API_ENDPOINTS.TICKETS.LIST,
+        params: { ...params } as Record<string, string | number | boolean | undefined>,
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.data.map(({ id }) => ({ type: 'Ticket' as const, id })),
+              { type: 'Ticket', id: 'LIST' },
+            ]
+          : [{ type: 'Ticket', id: 'LIST' }],
+    }),
+    createTicket: builder.mutation<Ticket, CreateTicketPayload>({
+      query: (payload) => ({ url: API_ENDPOINTS.TICKETS.LIST, method: 'POST', body: payload }),
+      invalidatesTags: [{ type: 'Ticket', id: 'LIST' }],
+    }),
+  }),
+});
+
+export const { useGetTicketsQuery, useCreateTicketMutation } = ticketApi;
+```
+
+Key rules:
+- Always `injectEndpoints` on `baseApi` — never `createApi()`
+- One file per feature: `auth-api.ts`, `ticket-api.ts`, `comment-api.ts`
+- `providesTags` and `invalidatesTags` on every endpoint
+- Use `API_ENDPOINTS` — no hardcoded paths
+- Register via side-effect import in `src/lib/store/index.ts`
+- `baseApi` custom `baseQueryFn` routes all requests through `tmsFetch`
+
+### 5. Auth API + Cookie Actions
+
+**`src/services/auth-api.ts`** — login mutation + getMe query:
+```typescript
+login: builder.mutation<LoginResponse, LoginPayload>({
+  query: (body) => ({ url: API_ENDPOINTS.AUTH.LOGIN, method: 'POST', body, skipAuth: true }),
+  async onQueryStarted(_arg, { queryFulfilled }) {
+    const { data } = await queryFulfilled;
+    await setAuthCookieAction(data.token);
+  },
+}),
+```
+
+**`src/actions/auth-actions.ts`** — cookie-only Server Actions:
+```typescript
+'use server';
+export async function setAuthCookieAction(token: string): Promise<void> { /* setAuthCookie */ }
+export async function logoutAction(): Promise<void> { /* removeAuthCookie */ }
+```
+
+- Login via `useLoginMutation` — not a standalone `loginAction`
+- Token never returned to client — only user object in Redux
+
+### 6. Redux Slice (client UI state only — auth example)
+
+```typescript
 const authSlice = createSlice({
   name: 'auth',
   initialState: { user: null as AuthUser | null },
@@ -110,45 +157,28 @@ const authSlice = createSlice({
 - Store user object only — never the JWT token
 - Wire in `src/lib/store/index.ts` as `authReducer`
 
-### 5. RTK Query Service (legacy — prefer Server Actions for new work)
+### 7. Store (`src/lib/store/index.ts`)
 
 ```typescript
-// src/services/commentApi.ts
-import { baseApi } from './baseApi';
+import { baseApi } from '@/services/baseApi';
+import '@/services/auth-api';
+import '@/services/ticket-api';
+import '@/services/comment-api';
 
-export const commentApi = baseApi.injectEndpoints({
-  endpoints: (builder) => ({
-    getComments: builder.query<Comment[], number>({
-      query: (ticketId) => `/tickets/${ticketId}/comments`,
-      providesTags: (_r, _e, id) => [{ type: 'Comment', id }],
-    }),
-    createComment: builder.mutation<Comment, CreateCommentPayload>({
-      query: ({ ticketId, content }) => ({
-        url: `/tickets/${ticketId}/comments`,
-        method: 'POST',
-        body: { content },
-      }),
-      invalidatesTags: (_r, _e, { ticketId }) => [{ type: 'Comment', id: ticketId }],
-    }),
-  }),
-});
-
-export const { useGetCommentsQuery, useCreateCommentMutation } = commentApi;
+export const makeStore = () =>
+  configureStore({
+    reducer: {
+      auth: authReducer,
+      [baseApi.reducerPath]: baseApi.reducer,
+    },
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(baseApi.middleware),
+  });
 ```
 
-Key rules:
-- Always `injectEndpoints` on `baseApi` — never `createApi()`
-- `providesTags` and `invalidatesTags` on every endpoint
-- No store wiring needed for `injectEndpoints`
-- Note: `baseApi.ts` reads `document.cookie` — httpOnly cookies are invisible; migrate to Server Actions
-
-### 6. AuthWrapper + Feature Layout (route protection)
+### 8. AuthWrapper + Feature Layout (route protection)
 
 ```typescript
 // src/components/AuthWrapper/index.tsx — async Server Component
-import { redirect } from 'next/navigation';
-import { getAuthCookie } from '@/lib/cookies';
-
 export default async function AuthWrapper({ children }: { children: React.ReactNode }) {
   const token = await getAuthCookie();
   if (!token) redirect('/');
@@ -156,34 +186,41 @@ export default async function AuthWrapper({ children }: { children: React.ReactN
 }
 
 // src/app/tickets/layout.tsx — per-feature, NOT root layout
-import AuthWrapper from '@/components/AuthWrapper';
 export default function TicketsLayout({ children }: { children: React.ReactNode }) {
   return <AuthWrapper>{children}</AuthWrapper>;
 }
 ```
 
-### 7. Login Form Client Component
+### 9. Login Form Client Component
 
 ```typescript
-// src/components/LoginForm/index.tsx
 'use client';
+const [login, { isLoading }] = useLoginMutation();
+
 const onSubmit = async (values: LoginPayload) => {
-  const result = await loginAction(values);
-  if (!result.success) { setError('root', { message: result.error }); return; }
-  dispatch(setCredentials(result.user!));
-  router.push('/tickets');
+  try {
+    const data = await login(values).unwrap();
+    dispatch(setCredentials(data.user));
+    router.push('/tickets');
+  } catch (error) {
+    setError('root', { message: extractApiError(error) });
+  }
 };
 ```
 
-- Call Server Action directly — no RTK Query, no `document.cookie`
+- Use `useLoginMutation` from `auth-api.ts`
 - Dispatch `setCredentials` with user object only
+- Handle 429 rate-limit with user-facing message
 
-### 8. Server Component (async data fetching)
+### 10. Server Component (async data fetching)
 
 ```typescript
-// src/components/[Feature]/Server[Name].tsx  — NO 'use client'
-export async function Server[Name]({ id }: { id: number }) {
-  const res = await fetch(`${BASE}/resource/${id}`, { cache: 'no-store' });
+export async function ServerTicketList() {
+  const token = await getAuthCookie();
+  const res = await fetch(`${BASE}${API_ENDPOINTS.TICKETS.LIST}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: 'no-store',
+  });
   if (!res.ok) throw new Error('Failed to load');
   const data = await res.json();
   return <div>{/* render data */}</div>;
@@ -192,45 +229,30 @@ export async function Server[Name]({ id }: { id: number }) {
 
 - `async function` — no hooks, no events, no browser APIs
 - Throw on failure — caught by `error.tsx`
-- Props must be serializable
-- For authenticated fetches: read token via `getAuthCookie()`, inject Bearer header
+- For RSC fetches: read token via `getAuthCookie()`, inject Bearer header
+- For client interactivity: prefer RTK Query hooks (routes through `tmsFetch`)
 
-### 9. Client Component (interactivity)
+### 11. Client Component (interactivity)
 
 ```typescript
-// src/components/[Feature]/[Name]/index.tsx
-'use client';  // line 1
+'use client';
+import { useCreateCommentMutation } from '@/services/comment-api';
 
-import { useState } from 'react';
-import { Button, TextField } from '@mui/material';
-import { useCreateCommentMutation } from '@/services/commentApi';
-import styles from './[name].module.scss';
-
-export function [Name]({ ticketId }: { ticketId: number }) {
+export function CommentForm({ ticketId }: { ticketId: number }) {
   const [createComment, { isLoading }] = useCreateCommentMutation();
-  ...
+  // ...
 }
 ```
 
 - `'use client'` on line 1 — before all imports
-- Named export
+- RTK Query hooks for reads/mutations — all backend calls route through `tmsFetch`
 - SCSS module co-located — no `@use 'abstracts'` (auto-injected)
 - MUI inputs via `Controller` if inside a form
-- Forms submit via Server Action — not RTK Query mutation (unless legacy ticket flow)
 
-### 10. Page (`src/app/[route]/page.tsx`)
+### 12. Page (`src/app/[route]/page.tsx`)
 
 ```typescript
-import type { Metadata } from 'next';
-import { Suspense } from 'react';
-import { ServerComponent } from '@/components/Feature/ServerComponent';
-import { ClientComponent } from '@/components/Feature/ClientComponent';
-import { FeatureSkeleton } from '@/components/Feature/FeatureSkeleton';
-
-export const metadata: Metadata = {
-  title: 'Page Title | Support Portal',
-  description: 'Page description under 155 chars.',
-};
+export const metadata: Metadata = { title: 'Page Title | Support Portal' };
 
 export default function FeaturePage() {
   return (
@@ -241,24 +263,6 @@ export default function FeaturePage() {
       <ClientComponent />
     </main>
   );
-}
-```
-
-- Default export (Next.js requirement for pages)
-- `metadata` export on every page
-- Wrap slow async RSC in `<Suspense>`
-- Login page (`src/app/page.tsx`): Static RSC shell rendering `<LoginForm />` — no fetch needed
-
-### 11. Loading + Error UI
-
-```typescript
-// src/app/[route]/loading.tsx
-export default function Loading() { return <FeatureSkeleton />; }
-
-// src/app/[route]/error.tsx
-'use client';
-export default function Error({ error, reset }: { error: Error; reset: () => void }) {
-  return <div><p>Error: {error.message}</p><button onClick={reset}>Retry</button></div>;
 }
 ```
 
@@ -274,10 +278,10 @@ export default function Error({ error, reset }: { error: Error; reset: () => voi
 - [ ] Submit buttons reflect `isLoading` state
 - [ ] `'use client'` on line 1 in every Client Component
 - [ ] `metadata` exported from every page
-- [ ] No token in Redux, Server Action returns, or client-accessible storage
+- [ ] No token in Redux, RTK Query cache, or client-accessible storage
 - [ ] `src/lib/cookies.ts` not imported in any Client Component
+- [ ] New feature endpoints added via `injectEndpoints` + store side-effect import
 - [ ] `AuthWrapper` in feature `layout.tsx` only — root layout public
-- [ ] Backend calls from browser go through Server Actions only
 - [ ] `npx tsc --noEmit` passes
 - [ ] `npm run lint` passes
 - [ ] Feature works in browser (`npm run dev`)

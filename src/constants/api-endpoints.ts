@@ -1,12 +1,18 @@
+export const API_VERSION = '/api/v1';
 export const API_ENDPOINTS = {
   AUTH: {
-    LOGIN: '/v1/auth/login',
-    ME: '/v1/auth/me',
+    LOGIN: `${API_VERSION}/auth/login`,
+    ME: `${API_VERSION}/auth/me`,
   },
   TICKETS: {
-    LIST: '/v1/tickets',
-    BY_ID: (id: number | string) => `/v1/tickets/${id}`,
-    STATUS: (id: number | string) => `/v1/tickets/${id}/status`,
-    ASSIGN: (id: number | string) => `/v1/tickets/${id}/assign`,
+    LIST: `${API_VERSION}/tickets`,
+    BY_ID: (id: number | string) => `${API_VERSION}/tickets/${id}`,
+    STATUS: (id: number | string) => `${API_VERSION}/tickets/${id}/status`,
+    ASSIGN: (id: number | string) => `${API_VERSION}/tickets/${id}/assign`,
+  },
+  COMMENTS: {
+    BY_TICKET: (ticketId: number | string) => `${API_VERSION}/tickets/${ticketId}/comments`,
+    BY_ID: (ticketId: number | string, commentId: number | string) =>
+      `${API_VERSION}/tickets/${ticketId}/comments/${commentId}`,
   },
 } as const;

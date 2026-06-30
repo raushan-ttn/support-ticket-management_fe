@@ -22,9 +22,8 @@ Review the diff / @mentioned files. Be specific: cite file + line + severity, ex
 ## Checklist
 - **RSC/CC boundary** — `'use client'` only when needed + on line 1; no MUI/`useRouter`/`window` in RSC; serializable props RSC→CC.
 - **TypeScript** — no `any`; everything typed; `interface` for objects; boolean `is/has/can/should`; named exports (default only `page`/`layout`/`error`); `@/` alias.
-- **Data** — RSC uses `fetch()` + cache opts (not RTK Query); RTK hooks only in CC (legacy); no `useEffect` fetching.
-- **Server Actions** — `'use server'`; Zod before any call; server-to-server fetch; returns `{success,error?}` (no token); revalidate on success.
-- **Auth** — httpOnly cookie via `cookies.ts` (server-only); `AuthWrapper` in feature layout; login via `loginAction`; no `document.cookie`/`localStorage`.
+- **Data** — RSC uses `fetch()` + cache opts (not RTK Query); RTK hooks only in CC; all client API calls route through `tmsFetch` via `baseApi`.
+- **Auth** — httpOnly cookie via `cookies.ts` (server-only); `AuthWrapper` in feature layout; login via `useLoginMutation`; no `document.cookie`/`localStorage`.
 - **Forms** — `noValidate`; MUI via `Controller`; field errors via `helperText`/`FormHelperText`; API errors `role="alert"`; submit `disabled={isLoading}`; no `useState` for values.
 - **SCSS** — no `@use 'abstracts'`; co-located kebab-case; semantic class names; no inline `style={{}}` for component styles.
 - **Security** — no secrets in `NEXT_PUBLIC_*`; no tokens/PII returned; no `dangerouslySetInnerHTML` without DOMPurify.

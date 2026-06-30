@@ -51,11 +51,11 @@ All three must pass cleanly.
 
 #### 5. Auth Flow
 - Unauthenticated visit to `/tickets/**` → redirects to `/` (login page)
-- Login with valid credentials → lands on `/tickets`; cookie set (httpOnly — verify in DevTools Application tab, not `document.cookie`)
+- Login with valid credentials → lands on `/tickets`; httpOnly cookie set (verify in DevTools Application → Cookies)
 - Login with invalid credentials → `role="alert"` error shown; no cookie set
 - Login with rate-limited backend (429) → user-facing error message displayed
-- Logout → cookie removed; redirect to `/`; Redux `user` cleared
-- No direct browser requests to backend for auth (all via Server Actions)
+- Logout → cookie removed via `logoutAction`; redirect to `/`; Redux `user` cleared
+- No direct browser requests to backend (all via RTK Query → `tmsFetch`)
 - Token not visible in Redux DevTools or `document.cookie`
 
 #### 6. RSC/CC Boundary
@@ -80,9 +80,9 @@ Recommended stack: **Vitest** + **React Testing Library** + **MSW** (API mocking
 - Utility functions in `src/lib/`
 
 ### What to Integration Test
-- LoginForm: render → fill email/password → submit → assert `loginAction` called, redirect on success
+- LoginForm: render → fill email/password → submit → assert `useLoginMutation` called, redirect on success
 - AuthWrapper: mock `getAuthCookie` → assert redirect when absent, children render when present
-- Server Actions: mock `fetch` → assert cookie set on login, Bearer injected on authenticated calls
+- tmsFetch: mock `fetch` → assert cookie read for auth, Bearer injected, `skipAuth` on login
 
 ### What NOT to Mock
 - Never mock the Redux store — use a real `makeStore()` instance
@@ -93,7 +93,8 @@ Recommended stack: **Vitest** + **React Testing Library** + **MSW** (API mocking
 ```
 src/
   components/TicketsPage/__tests__/TicketsPage.test.tsx
-  services/__tests__/ticketApi.test.ts
+  services/__tests__/ticket-api.test.ts
+  lib/__tests__/tms-fetch.test.ts
   lib/store/slices/__tests__/auth-slice.test.ts
 ```
 

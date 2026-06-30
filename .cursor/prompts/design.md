@@ -20,12 +20,12 @@ Analyse the @mentioned component/page and recommend the optimal strategy.
    - Shared, scheduled change → ISR `revalidate: 60` + tags, `revalidateTag` on mutation
    - Shared, frequent → Dynamic `no-store` / `export const dynamic = 'force-dynamic'`
    - User-specific → Dynamic with Bearer from `getAuthCookie()`
-   - Backend mutation (auth, CRUD) → Server Action (server-to-server, no CORS)
-   - Login / logout → Server Action + httpOnly cookie — never RTK Query or `document.cookie`
+   - Backend mutation (auth, CRUD) → RTK Query mutation → `tmsFetch` (server-to-server, no CORS)
+   - Login / logout → `useLoginMutation` + `setAuthCookieAction` / `logoutAction`
    - Route protection → `AuthWrapper` async RSC in per-feature `layout.tsx`
-   - Interactivity (form/real-time) → Client Component leaf calling Server Action
-   - Legacy ticket reads with client cache → RTK Query (migrate to Server Actions)
-3. **Auth architecture** — token in `httpOnly` cookie (`src/lib/cookies.ts`); user in Redux `authSlice`; browser never calls backend directly. Reference: `.cursor/plans/login_page_+_route_guard_f355fa26.plan.md`.
+   - Interactivity (form/real-time) → Client Component leaf with RTK Query hooks
+   - Client cache + invalidation → RTK Query via `baseApi.injectEndpoints`
+3. **Auth architecture** — token in `httpOnly` cookie (`src/lib/cookies.ts`, read by `tmsFetch`); user in Redux `authSlice`; browser never calls backend directly. Reference: `.cursor/plans/tmsfetch_global_interceptor_b48c708c.plan.md`.
 4. **Streaming** — wrap slow fetches in `<Suspense>`; add `loading.tsx`.
 5. **Bundle** — heavy client lib → `dynamic()`; extract any server-renderable part to an RSC.
 

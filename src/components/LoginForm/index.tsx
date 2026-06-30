@@ -1,12 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDispatch } from 'react-redux';
 import { Alert, Button, Stack, TextField } from '@mui/material';
-import { loginAction } from '@/actions/auth-actions';
+import { useLoginMutation } from '@/services/auth-api';
 import { setCredentials } from '@/lib/store/authSlice';
 import type { AppDispatch } from '@/lib/store';
 import { loginSchema, type LoginPayload } from '@/types/auth';
@@ -34,7 +33,7 @@ function TtnLogoIcon() {
 export default function LoginForm() {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [login, { isLoading: isSubmitting }] = useLoginMutation();
 
   const {
     control,
@@ -47,17 +46,26 @@ export default function LoginForm() {
   });
 
   async function onSubmit(values: LoginPayload) {
-    setIsSubmitting(true);
     try {
-      const result = await loginAction(values);
-      if (!result.success) {
-        setError('root', { message: result.error });
-        return;
-      }
-      dispatch(setCredentials(result.user!));
+      const data = await login(values).unwrap();
+      dispatch(setCredentials(data.user));
       router.push('/tickets');
-    } finally {
-      setIsSubmitting(false);
+    } catch (error) {
+      const status =
+        typeof error === 'object' && error !== null && 'status' in error
+          ? Number((error as { status: unknown }).status)
+          : undefined;
+      const message =
+        typeof error === 'object' && error !== null && 'data' in error
+          ? String((error as { data: unknown }).data)
+          : 'Invalid credentials';
+
+      setError('root', {
+        message:
+          status === 429
+            ? 'Too many login attempts. Please try again later.'
+            : message,
+      });
     }
   }
 

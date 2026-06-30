@@ -40,24 +40,22 @@ Review a diff or set of files for correctness, Next.js convention compliance, se
 - [ ] No `useEffect` for data fetching — RTK Query subscriptions handle this
 - [ ] Parallel fetches use `Promise.all` — no unnecessary waterfalls
 
-### Server Actions
-- [ ] `'use server'` at top of the action file
-- [ ] Zod schema validates ALL input before any API call
-- [ ] Server-to-server `fetch()` — browser never calls backend directly
-- [ ] Reads token via `getAuthCookie()` for authenticated calls
-- [ ] Returns `{ success, error? }` — does not throw raw errors
-- [ ] Never returns token, secrets, or PII in return values
-- [ ] `revalidatePath` or `revalidateTag` called after successful mutation when cache affected
-- [ ] Handles 429 rate-limit responses with user-facing message (auth endpoints)
+### RTK Query & tmsFetch
+- [ ] New endpoints added via `injectEndpoints` on `baseApi` — not a new `createApi()`
+- [ ] Feature service imported as side effect in `src/lib/store/index.ts`
+- [ ] `providesTags` on every query, `invalidatesTags` on every mutation
+- [ ] `API_ENDPOINTS` used for paths — no hardcoded URLs
+- [ ] Login mutation uses `skipAuth: true`
 
 ### Auth & Route Guards
 - [ ] `AuthWrapper` is async Server Component using `getAuthCookie()` + `redirect('/')`
 - [ ] Applied in per-feature `layout.tsx` — not root `src/app/layout.tsx`
 - [ ] Login page (`src/app/page.tsx`) outside any `AuthWrapper` — no redirect loop
-- [ ] `loginAction` calls `setAuthCookie()` — token never returned to client
+- [ ] `useLoginMutation` calls `setAuthCookieAction` via `onQueryStarted` — token never returned to client
 - [ ] `LoginForm` dispatches `setCredentials(user)` — no token in Redux
 - [ ] `src/lib/cookies.ts` never imported in Client Components
 - [ ] No `document.cookie` or `localStorage` for auth token
+- [ ] All client API calls route through `tmsFetch` (via RTK Query `baseApi`) — no direct browser fetch to backend
 
 ### Route Handlers (avoid for backend proxy — use Server Actions)
 - [ ] Auth token extracted from headers and validated on every protected endpoint

@@ -7,8 +7,8 @@ alwaysApply: false
 # Code & Implementation
 
 ## Server Actions
-- Use for: data-mutating form submits (create/update/delete), server-side validation + DB access, mutations not tied to an RTK Query cache. Use RTK Query mutations instead for optimistic updates, `invalidatesTags`, or when fired from a Client Component already using RTK Query.
-- `'use server'` in `src/actions/*` or inline in an RSC; never in a file that also has `'use client'` components.
+- Use for: cookie management (`setAuthCookieAction`, `logoutAction`), RSC-only mutations not tied to RTK Query cache. Client API calls go through RTK Query → `tmsFetch` instead.
+- `'use server'` in `src/actions/*` or `src/lib/tms-fetch.ts`; never in a file that also has `'use client'` components.
 - Validate input with Zod first; use only parsed data — never trust raw `formData`.
 - Return a typed `{ success, error?, data? }` — never throw (Client needs the error state); never return raw errors/stack traces/secrets.
 - Revalidate after success via `revalidatePath`/`revalidateTag`. Consume with `useActionState` (React 19) + `useFormStatus` for pending state.
