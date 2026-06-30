@@ -53,6 +53,22 @@ function getErrorMessage(body: unknown, fallback: string): string {
   return fallback;
 }
 
+function parseResponseBody<T>(json: unknown): T {
+  if (typeof json !== 'object' || json === null) {
+    return json as T;
+  }
+
+  const record = json as Record<string, unknown>;
+
+  // Unwrap simple `{ data: T }` envelopes only (e.g. auth/me).
+  // Keep paginated shapes like `{ data: [], total, page, limit }` intact.
+  if ('data' in record && Object.keys(record).length === 1) {
+    return record.data as T;
+  }
+
+  return json as T;
+}
+
 export async function tmsFetch<T>(
   path: string,
   opts?: TmsFetchOptions,
@@ -104,12 +120,8 @@ export async function tmsFetch<T>(
     }
 
     const json: unknown = await response.json();
-    const data =
-      typeof json === 'object' && json !== null && 'data' in json
-        ? (json as { data: T }).data
-        : (json as T);
 
-    return { data };
+    return { data: parseResponseBody<T>(json) };
   } catch (error) {
     return {
       error: {

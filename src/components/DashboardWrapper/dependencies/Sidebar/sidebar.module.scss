@@ -1,0 +1,122 @@
+$color-accent: #e91e8c;
+$color-accent-light: #fce4f0;
+$sidebar-width: 185px;
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: $sidebar-width;
+  min-height: 100vh;
+  background-color: $color-white;
+  border-right: 1px solid $color-gray-200;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-4 $space-4 $space-6;
+}
+
+.logoIcon {
+  flex-shrink: 0;
+}
+
+.logoText {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+  color: $color-gray-800;
+  line-height: $line-height-tight;
+}
+
+.nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+  padding: 0 $space-2;
+  overflow-y: auto;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-2 $space-3;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+  color: $color-gray-600;
+  text-decoration: none;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: default;
+  position: relative;
+  transition: color $transition-base, background-color $transition-base;
+
+  &:hover:not(.navItemDisabled) {
+    background-color: $color-gray-50;
+    color: $color-gray-800;
+  }
+}
+
+.navItemLink {
+  cursor: pointer;
+}
+
+.navItemActive {
+  color: $color-accent;
+  font-weight: $font-weight-medium;
+  background-color: $color-accent-light;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: $space-1;
+    bottom: $space-1;
+    width: 3px;
+    border-radius: 0 $radius-sm $radius-sm 0;
+    background-color: $color-accent;
+  }
+}
+
+.navItemDisabled {
+  opacity: 0.85;
+}
+
+.navIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: inherit;
+}
+
+.navLabel {
+  flex: 1;
+  @include truncate;
+}
+
+.navChevron {
+  flex-shrink: 0;
+  color: $color-gray-400;
+}
+
+.logoutWrapper {
+  padding: 0 $space-2 $space-2;
+}
+
+.logoutButton {
+  cursor: pointer;
+}
+
+.footer {
+  padding: $space-4;
+  font-size: $font-size-xs;
+  color: $color-gray-400;
+  border-top: 1px solid $color-gray-100;
+}

@@ -1,0 +1,19 @@
+{
+  "brandName": "NewersWorld",
+  "footer": "Support Ticket Management",
+  "ADMIN": {
+    "navItems": [
+      { "id": "home", "label": "Home", "href": "/tickets", "icon": "home" },
+      { "id": "profile", "label": "My Profile", "href": "/user/me", "icon": "profile" }
+    ],
+    "logout": { "label": "Logout", "icon": "logout" }
+  },
+  "AGENT": {
+    "navItems": [
+      { "id": "home", "label": "Home", "href": null, "icon": "home" },
+      { "id": "my-tickets", "label": "My Tickets", "href": "/tickets", "icon": "ticket" },
+      { "id": "profile", "label": "My Profile", "href": "/user/me", "icon": "profile" }
+    ],
+    "logout": { "label": "Logout", "icon": "logout" }
+  }
+}

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import GuestWrapper from '@/components/GuestWrapper';
 import LoginForm from '@/components/LoginForm';
 
 export const metadata: Metadata = {
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function LoginPage() {
-  return <LoginForm />;
+  return (
+    <GuestWrapper>
+      <LoginForm />
+    </GuestWrapper>
+  );
 }

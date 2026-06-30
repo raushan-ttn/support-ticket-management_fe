@@ -1,4 +1,5 @@
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import { getListItems } from '@/lib/list-response';
 import { baseApi } from '@/services/baseApi';
 
 export interface Comment {
@@ -28,13 +29,13 @@ export const commentApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getComments: builder.query<CommentsResponse, number>({
       query: (ticketId) => ({ url: API_ENDPOINTS.COMMENTS.BY_TICKET(ticketId) }),
-      providesTags: (result, _err, ticketId) =>
-        result
-          ? [
-              ...result.data.map(({ id }) => ({ type: 'Comment' as const, id })),
-              { type: 'Comment', id: `LIST-${ticketId}` },
-            ]
-          : [{ type: 'Comment', id: `LIST-${ticketId}` }],
+      providesTags: (result, _err, ticketId) => {
+        const comments = getListItems<Comment>(result);
+        return [
+          ...comments.map(({ id }) => ({ type: 'Comment' as const, id })),
+          { type: 'Comment', id: `LIST-${ticketId}` },
+        ];
+      },
     }),
 
     createComment: builder.mutation<Comment, CreateCommentPayload>({
