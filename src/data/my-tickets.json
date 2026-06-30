@@ -1,0 +1,20 @@
+{
+  "stats": { "open": 0, "inProgress": 0, "closed": 2 },
+  "duration": "Last 6 Months",
+  "tickets": [
+    {
+      "id": 67851,
+      "category": "PF",
+      "title": "Claim submitted for advance payment",
+      "status": "closed",
+      "createdAt": "2026-03-18T12:03:00.000Z"
+    },
+    {
+      "id": 67773,
+      "category": "Office Facilities",
+      "title": "Bike parking sticker request",
+      "status": "closed",
+      "createdAt": "2026-03-13T10:00:00.000Z"
+    }
+  ]
+}

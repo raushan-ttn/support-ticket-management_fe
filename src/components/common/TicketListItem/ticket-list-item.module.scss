@@ -1,0 +1,36 @@
+// No @use needed — abstracts are injected globally via sassOptions.additionalData
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+  padding: $space-4 $space-5;
+  text-decoration: none;
+  background-color: $color-white;
+  border-bottom: 1px solid $color-gray-100;
+  transition: background-color $transition-fast;
+
+  &:hover {
+    background-color: $color-gray-50;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.meta {
+  font-size: $font-size-xs;
+  color: $color-gray-500;
+}
+
+.title {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-gray-900;
+}
+
+.date {
+  font-size: $font-size-xs;
+  color: $color-gray-500;
+}
