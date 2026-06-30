@@ -1,4 +1,5 @@
 import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import { getListItems, toPaginatedResponse } from '@/lib/list-response';
 import { baseApi } from '@/services/baseApi';
 
 export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
@@ -52,13 +53,18 @@ export const ticketApi = baseApi.injectEndpoints({
         url: API_ENDPOINTS.TICKETS.LIST,
         params: { ...params },
       }),
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.data.map(({ id }) => ({ type: 'Ticket' as const, id })),
-              { type: 'Ticket', id: 'LIST' },
-            ]
-          : [{ type: 'Ticket', id: 'LIST' }],
+      transformResponse: (response: unknown, _meta, arg) =>
+        toPaginatedResponse<Ticket>(response, {
+          page: arg?.page,
+          limit: arg?.limit,
+        }),
+      providesTags: (result) => {
+        const tickets = getListItems<Ticket>(result);
+        return [
+          ...tickets.map(({ id }) => ({ type: 'Ticket' as const, id })),
+          { type: 'Ticket', id: 'LIST' },
+        ];
+      },
     }),
 
     getTicketById: builder.query<Ticket, number>({

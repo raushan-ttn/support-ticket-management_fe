@@ -9,26 +9,8 @@ import { useLoginMutation } from '@/services/auth-api';
 import { setCredentials } from '@/lib/store/authSlice';
 import type { AppDispatch } from '@/lib/store';
 import { loginSchema, type LoginPayload } from '@/types/auth';
+import { TtnLogoIcon } from '@/components/common/globalSvg';
 import styles from './login-form.module.scss';
-
-function TtnLogoIcon() {
-  return (
-    <svg
-      className={styles.logoIcon}
-      width="48"
-      height="48"
-      viewBox="0 0 48 48"
-      fill="none"
-      aria-hidden="true"
-    >
-      <polygon points="24,4 44,16 36,44 12,44 4,16" fill="#e91e8c" />
-      <polygon points="24,4 44,16 24,28 4,16" fill="#7b2ff7" />
-      <polygon points="4,16 24,28 12,44" fill="#2196f3" />
-      <polygon points="44,16 24,28 36,44" fill="#00bcd4" />
-      <polygon points="24,28 12,44 36,44" fill="#ffc107" />
-    </svg>
-  );
-}
 
 export default function LoginForm() {
   const router = useRouter();
@@ -76,7 +58,7 @@ export default function LoginForm() {
           <span>TO THE</span>
           <span>NEW</span>
         </div>
-        <TtnLogoIcon />
+        <TtnLogoIcon className={styles.logoIcon} />
       </div>
 
       <div className={styles.card}>
