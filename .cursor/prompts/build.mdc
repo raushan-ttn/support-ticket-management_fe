@@ -2,7 +2,7 @@
 description: SDLC Phase 3 — implement a feature end-to-end (page, components, services, actions, forms, metadata, figma)
 ---
 
-@.cursor/prompts/personas/implementer.md
+@.cursor/prompts/personas/implementer.mdc
 @.cursor/skills/implementation/SKILL.md
 
 # /build — Implementation

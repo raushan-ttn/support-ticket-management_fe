@@ -2,7 +2,7 @@
 description: SDLC Phase 6 — maintenance; root-cause debugging and post-release performance tuning
 ---
 
-@.cursor/prompts/personas/debugger.md
+@.cursor/prompts/personas/debugger.mdc
 @.cursor/skills/debugging/SKILL.md
 @.cursor/skills/performance/SKILL.md
 

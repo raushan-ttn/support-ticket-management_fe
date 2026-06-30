@@ -6,8 +6,8 @@ Three building blocks work together:
 ```
 .cursor/
   rules/       ← Consolidated coding conventions (3 auto-applied .mdc rules)
-  prompts/     ← Task-specific prompts (invoke with / in Cursor chat)
-    personas/  ← AI behaviour modes (loaded automatically by prompts)
+  prompts/     ← Task-specific prompts (.mdc — invoke with / in Cursor chat)
+    personas/  ← AI behaviour modes (.mdc — loaded automatically by prompts)
   skills/      ← Reference checklists (loaded by prompts or @mentioned manually)
 ```
 

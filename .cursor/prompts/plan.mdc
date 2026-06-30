@@ -2,7 +2,7 @@
 description: SDLC Phase 1 — plan a feature before any code (rendering strategy, affected files, risks)
 ---
 
-@.cursor/prompts/personas/planner.md
+@.cursor/prompts/personas/planner.mdc
 @.cursor/skills/planning/SKILL.md
 
 # /plan — Planning & Requirements

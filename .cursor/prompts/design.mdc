@@ -2,7 +2,7 @@
 description: SDLC Phase 2 — design & architecture; rendering-strategy analysis and documentation/ADRs
 ---
 
-@.cursor/prompts/personas/architect.md
+@.cursor/prompts/personas/architect.mdc
 @.cursor/skills/performance/SKILL.md
 @.cursor/skills/documentation/SKILL.md
 
