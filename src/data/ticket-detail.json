@@ -1,0 +1,56 @@
+{
+  "stats": { "open": 0, "inProgress": 0, "closed": 2 },
+  "duration": "Last 6 Months",
+  "tickets": [
+    {
+      "id": 67851,
+      "title": "Claim submitted for advance payment",
+      "description": "Hi Team, I have submitted a claim for advance payment. Kindly share the contact details of the concerned person so that the claim can be processed on time.",
+      "status": "closed",
+      "type": "PF",
+      "subType": "PF Information",
+      "assignee": "HR Team",
+      "createdAt": "2026-03-18T12:03:00.000Z"
+    },
+    {
+      "id": 67852,
+      "title": "Leave balance discrepancy",
+      "description": "My leave balance shows incorrect data for the current quarter. The portal shows 0 casual leaves remaining but I have not availed any since the start of the year.",
+      "status": "open",
+      "type": "Leave",
+      "subType": "Leave Balance",
+      "assignee": "HR Team",
+      "createdAt": "2026-03-20T09:15:00.000Z"
+    }
+  ],
+  "comments": [
+    {
+      "id": 1,
+      "ticketId": 67851,
+      "authorName": "HR Team",
+      "content": "Hi Raushan, Can you please elaborate your concern for better understanding.",
+      "createdAt": "2026-03-18T14:58:00.000Z"
+    },
+    {
+      "id": 2,
+      "ticketId": 67851,
+      "authorName": "HR Team",
+      "content": "Status updated to \"In-Progress\"",
+      "createdAt": "2026-03-18T14:59:00.000Z"
+    },
+    {
+      "id": 3,
+      "ticketId": 67851,
+      "authorName": "HR Team",
+      "content": "As discussed over chat, please note there is a defined process for the PF withdrawal, and the PF office executives takes the necessary actions once the request is raised on the EPFO portal. Unfortunately, there is no one we can redirect you to for expediting the process. You may refer to the PF manual available in the Important Links section for more details. We're closing the ticket basis your confirmation.",
+      "createdAt": "2026-03-18T15:18:00.000Z"
+    },
+    {
+      "id": 4,
+      "ticketId": 67852,
+      "authorName": "HR Team",
+      "content": "Hi, we have noted your concern. Our team will look into the leave balance discrepancy and get back to you within 2 working days.",
+      "createdAt": "2026-03-20T11:30:00.000Z"
+    }
+  ]
+}

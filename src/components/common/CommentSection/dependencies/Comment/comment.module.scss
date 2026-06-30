@@ -1,0 +1,50 @@
+.comment {
+  display: flex;
+  gap: $space-3;
+  padding: $space-3 0;
+
+  & + & {
+    border-top: 1px solid $color-gray-100;
+  }
+}
+
+.avatar {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: $radius-full;
+  background-color: $color-gray-200;
+  color: $color-gray-700;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+}
+
+.body {
+  @include flex-col-gap($space-1);
+  flex: 1;
+  min-width: 0;
+}
+
+.author {
+  display: block;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-gray-900;
+}
+
+.content {
+  margin: 0;
+  font-size: $font-size-sm;
+  color: $color-gray-700;
+  line-height: 1.5;
+}
+
+.timestamp {
+  display: block;
+  font-size: $font-size-xs;
+  color: $color-gray-400;
+}
