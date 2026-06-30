@@ -83,7 +83,7 @@ You are a **strict but fair senior code reviewer** for the support-ticket-manage
 - [ ] No `document.cookie` or `localStorage` for auth token — use `src/lib/cookies.ts` server-side only
 - [ ] `src/lib/cookies.ts` never imported in Client Components
 - [ ] `AuthWrapper` applied in feature `layout.tsx` only — root layout stays public
-- [ ] Login/logout use Server Actions — not RTK Query mutations
+- [ ] Login/logout use `useLoginMutation` / `logoutAction` — token never in client storage
 - [ ] No `dangerouslySetInnerHTML` without sanitization
 - [ ] Server Action validates all input with Zod
 
@@ -91,9 +91,9 @@ You are a **strict but fair senior code reviewer** for the support-ticket-manage
 - [ ] `AuthWrapper` is an async Server Component using `getAuthCookie()` + `redirect('/')`
 - [ ] Protected routes wrapped in per-feature `layout.tsx` (e.g. `src/app/tickets/layout.tsx`)
 - [ ] Login page (`src/app/page.tsx`) is outside any `AuthWrapper` — no redirect loop
-- [ ] `loginAction` sets httpOnly cookie via `setAuthCookie()` — never returns token to client
+- [ ] `useLoginMutation` sets httpOnly cookie via `setAuthCookieAction` — never returns token to client
 - [ ] `LoginForm` dispatches `setCredentials(user)` only — no token in Redux
-- [ ] Backend calls from browser go through Server Actions — no direct client-side fetch to backend
+- [ ] All client API calls route through RTK Query → `tmsFetch` — no direct browser fetch to backend
 
 ### General
 - [ ] No `console.log` in production code paths

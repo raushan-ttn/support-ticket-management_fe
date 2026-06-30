@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { type TicketsQuery } from '@/services/ticketApi';
+import { type TicketsQuery } from '@/services/ticket-api';
 import CreateTicketForm from './dependencies/CreateTicketForm';
 import TicketList from './dependencies/TicketList';
 import styles from './TicketsPage.module.scss';

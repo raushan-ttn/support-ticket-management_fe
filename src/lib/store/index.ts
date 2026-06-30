@@ -1,14 +1,17 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { ticketApi } from '@/services/ticketApi';
+import { baseApi } from '@/services/baseApi';
 import authReducer from './authSlice';
+import '@/services/auth-api';
+import '@/services/ticket-api';
+import '@/services/comment-api';
 
 export const makeStore = () =>
   configureStore({
     reducer: {
       auth: authReducer,
-      [ticketApi.reducerPath]: ticketApi.reducer,
+      [baseApi.reducerPath]: baseApi.reducer,
     },
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(ticketApi.middleware),
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(baseApi.middleware),
   });
 
 export type AppStore = ReturnType<typeof makeStore>;

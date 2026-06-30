@@ -1,4 +1,5 @@
-import { baseApi } from './baseApi';
+import { API_ENDPOINTS } from '@/constants/api-endpoints';
+import { baseApi } from '@/services/baseApi';
 
 export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
 export type TicketPriority = 'low' | 'medium' | 'high' | 'critical';
@@ -47,7 +48,10 @@ export interface UpdateTicketPayload {
 export const ticketApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getTickets: builder.query<TicketsResponse, TicketsQuery | void>({
-      query: (params = {}) => ({ url: '/tickets', params: params ?? undefined }),
+      query: (params = {}) => ({
+        url: API_ENDPOINTS.TICKETS.LIST,
+        params: { ...params },
+      }),
       providesTags: (result) =>
         result
           ? [
@@ -58,27 +62,26 @@ export const ticketApi = baseApi.injectEndpoints({
     }),
 
     getTicketById: builder.query<Ticket, number>({
-      query: (id) => `/tickets/${id}`,
+      query: (id) => ({ url: API_ENDPOINTS.TICKETS.BY_ID(id) }),
       providesTags: (_result, _err, id) => [{ type: 'Ticket', id }],
     }),
 
     createTicket: builder.mutation<Ticket, CreateTicketPayload>({
       query: ({ attachments, ...rest }) => {
-        // Use FormData when attachments are present
         if (attachments?.length) {
           const body = new FormData();
-          Object.entries(rest).forEach(([k, v]) => body.append(k, String(v)));
+          Object.entries(rest).forEach(([key, value]) => body.append(key, String(value)));
           attachments.forEach((file) => body.append('attachments', file));
-          return { url: '/tickets', method: 'POST', body };
+          return { url: API_ENDPOINTS.TICKETS.LIST, method: 'POST', body };
         }
-        return { url: '/tickets', method: 'POST', body: rest };
+        return { url: API_ENDPOINTS.TICKETS.LIST, method: 'POST', body: rest };
       },
       invalidatesTags: [{ type: 'Ticket', id: 'LIST' }],
     }),
 
     updateTicket: builder.mutation<Ticket, UpdateTicketPayload>({
       query: ({ id, ...patch }) => ({
-        url: `/tickets/${id}`,
+        url: API_ENDPOINTS.TICKETS.BY_ID(id),
         method: 'PATCH',
         body: patch,
       }),
@@ -89,7 +92,7 @@ export const ticketApi = baseApi.injectEndpoints({
     }),
 
     deleteTicket: builder.mutation<void, number>({
-      query: (id) => ({ url: `/tickets/${id}`, method: 'DELETE' }),
+      query: (id) => ({ url: API_ENDPOINTS.TICKETS.BY_ID(id), method: 'DELETE' }),
       invalidatesTags: (_result, _err, id) => [
         { type: 'Ticket', id },
         { type: 'Ticket', id: 'LIST' },

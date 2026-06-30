@@ -40,7 +40,7 @@ npm run start
 - [ ] Invalid credentials show `role="alert"` error — no cookie set
 - [ ] Logout removes cookie and clears Redux user state
 - [ ] No JWT token in Redux state or Server Action responses
-- [ ] No direct browser-to-backend requests for auth (Server Actions only)
+- [ ] No direct browser-to-backend requests (all via RTK Query → `tmsFetch`)
 
 ### 4. Feature Smoke Tests
 For every changed route, run through:

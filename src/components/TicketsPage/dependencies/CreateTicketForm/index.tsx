@@ -16,7 +16,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useCreateTicketMutation, type TicketPriority } from '@/services/ticketApi';
+import { useCreateTicketMutation, type TicketPriority } from '@/services/ticket-api';
 
 const PRIORITIES: TicketPriority[] = ['low', 'medium', 'high', 'critical'];
 

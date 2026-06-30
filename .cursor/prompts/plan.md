@@ -14,10 +14,10 @@ Produce a reviewable implementation plan for the feature below. Write no code un
 
 ## Produce
 1. **Clarify** — what it does, who uses it, auth required?, protected routes?, data user-specific (→ dynamic) or shared (→ static/ISR)?, interactivity needed?
-2. **Rendering strategy** (choose one + justify): Static RSC · Dynamic RSC (`no-store`) · ISR (`revalidate: N`) · Client Component + Server Action · Mixed (describe the boundary).
-3. **Affected files** — list every file across layers: `src/constants/api-endpoints.ts`, `src/types/*`, `src/lib/cookies.ts` (auth), `src/actions/*-actions.ts` (backend proxy), `src/components/AuthWrapper/` + `src/app/[feature]/layout.tsx` (route guard), `src/lib/store/*Slice.ts`, `src/components/[Feature]/*`, `src/app/[route]/{page,loading,error}.tsx`, co-located `.module.scss`.
-4. **Steps** — numbered, in dependency order (endpoints → types → cookies → actions → slice → CC → AuthWrapper/layout → page).
-5. **Risks / open questions** — CORS (Server Actions only?), httpOnly cookie security, AuthWrapper placement (per-feature layout, not root), redirect loop on login, legacy RTK Query migration, client boundary, cache `revalidateTag`, bundle (`dynamic()`?), slow fetch (`<Suspense>`?).
+2. **Rendering strategy** (choose one + justify): Static RSC · Dynamic RSC (`no-store`) · ISR (`revalidate: N`) · Client Component + RTK Query (`tmsFetch`) · Mixed (describe the boundary).
+3. **Affected files** — list every file across layers: `src/constants/api-endpoints.ts`, `src/types/*`, `src/lib/tms-fetch.ts`, `src/services/[feature]-api.ts`, `src/lib/cookies.ts` (auth), `src/actions/auth-actions.ts` (cookie actions), `src/components/AuthWrapper/` + `src/app/[feature]/layout.tsx` (route guard), `src/lib/store/*Slice.ts`, `src/components/[Feature]/*`, `src/app/[route]/{page,loading,error}.tsx`, co-located `.module.scss`.
+4. **Steps** — numbered, in dependency order (endpoints → types → feature-api → store import → slice → CC → AuthWrapper/layout → page).
+5. **Risks / open questions** — CORS (`tmsFetch` server-to-server?), httpOnly cookie security, AuthWrapper placement (per-feature layout, not root), redirect loop on login, FormData through Server Action boundary, client boundary, RTK Query `invalidatesTags`, bundle (`dynamic()`?), slow fetch (`<Suspense>`?).
 
 ## Output Template
 ```markdown

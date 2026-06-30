@@ -17,7 +17,7 @@ alwaysApply: false
 - Core Web Vitals: LCP < 2.5s (priority hero images, RSC to avoid client waterfalls), INP < 200ms (small Client subtrees, no main-thread blocking in handlers), CLS < 0.1 (explicit `width`/`height` on media, skeletons reserve space).
 
 ## Security
-- Auth token in `localStorage` (read in `src/services/baseApi.ts`) is an XSS risk; planned migration to `httpOnly` cookies. Until then: no other secrets/PII in `localStorage`; keep the existing pattern — no parallel token storage.
+- Auth token in `httpOnly` cookie via `src/lib/cookies.ts` — read in `tmsFetch` (`src/lib/tms-fetch.ts`) and Server Actions only; never `localStorage` or `document.cookie`. No parallel token storage.
 - Env: `NEXT_PUBLIC_*` is bundled to the client — never put secrets/keys there (base URL is fine). Non-public vars are server-only (RSC, Route Handlers, Server Actions, `next.config.ts`).
 - Validate before any DB/API call, using only parsed data: Server Action body (Zod, always), Route Handler body + query (Zod/manual, always), client mutation (Zod via RHF before dispatch), RSC URL params (coerce + bounds-check). Validate auth on every protected Route Handler.
 - XSS: avoid `dangerouslySetInnerHTML`; if unavoidable, sanitize user HTML with `DOMPurify` (client-side).
