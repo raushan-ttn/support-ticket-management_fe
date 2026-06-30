@@ -1,20 +1,128 @@
 // No @use needed — abstracts are injected globally via sassOptions.additionalData
 
 .page {
-  max-width: 768px;
-  margin-inline: auto;
-  padding: $space-8 $space-4;
+  padding: $space-5 $space-6;
   display: flex;
   flex-direction: column;
-  gap: $space-6;
+  gap: 0;
 }
 
-.heading {
-  font-size: $font-size-2xl;
-  font-weight: $font-weight-bold;
-  color: $color-gray-900;
+/* ── Page header ── */
 
-  @include respond-to(md) {
-    font-size: $font-size-3xl;
+.pageHeader {
+  @include flex-between;
+  align-items: center;
+  margin-bottom: $space-5;
+}
+
+.titleGroup {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  font-size: $font-size-2xl;
+  color: $color-gray-500;
+  cursor: pointer;
+  line-height: 1;
+  padding: $space-1 $space-2;
+  border-radius: $radius-sm;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: $color-gray-900;
   }
+}
+
+.pageTitle {
+  margin: 0;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-gray-900;
+}
+
+.durationWrapper {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+}
+
+.durationLabel {
+  font-size: $font-size-sm;
+  color: $color-gray-500;
+}
+
+.durationSelect {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-gray-900;
+  background: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0 $space-1;
+
+  &:focus-visible {
+    @include focus-ring;
+    border-radius: $radius-sm;
+  }
+}
+
+/* ── Stats ── */
+
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $space-4;
+  margin-bottom: $space-4;
+}
+
+/* ── Search ── */
+
+.searchWrapper {
+  background-color: $color-white;
+  border-radius: $radius-sm;
+  box-shadow: $shadow-sm;
+  padding: $space-3 $space-4;
+  margin-bottom: $space-4;
+}
+
+.searchInput {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: $font-size-sm;
+  color: $color-gray-700;
+  background: transparent;
+  font-family: inherit;
+
+  &::placeholder {
+    color: $color-gray-400;
+  }
+
+  &::-webkit-search-cancel-button {
+    cursor: pointer;
+  }
+}
+
+/* ── Ticket list ── */
+
+.ticketList {
+  background-color: $color-white;
+  border-radius: $radius-sm;
+  box-shadow: $shadow-sm;
+  overflow: hidden;
+}
+
+/* ── Empty state ── */
+
+.empty {
+  padding: $space-8;
+  font-size: $font-size-sm;
+  color: $color-gray-400;
+  text-align: center;
 }
