@@ -1,0 +1,70 @@
+.page {
+  min-height: 100vh;
+  @include flex-center;
+  flex-direction: column;
+  background-color: #2d3748;
+  padding: $space-8 $space-4;
+}
+
+.logo {
+  @include flex-center;
+  gap: $space-3;
+  margin-bottom: $space-8;
+}
+
+.logoText {
+  display: flex;
+  flex-direction: column;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-white;
+  letter-spacing: 0.05em;
+  line-height: $line-height-tight;
+}
+
+.logoIcon {
+  flex-shrink: 0;
+}
+
+.card {
+  width: 100%;
+  max-width: 480px;
+  background-color: $color-white;
+  border-radius: $radius-sm;
+  padding: $space-10;
+  box-shadow: $shadow-md;
+}
+
+.heading {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-gray-700;
+  margin-bottom: $space-2;
+}
+
+.subtitle {
+  font-size: $font-size-sm;
+  color: $color-gray-500;
+  margin-bottom: $space-6;
+  line-height: $line-height-base;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+}
+
+.error {
+  font-size: $font-size-sm;
+  color: $color-error;
+  margin: 0;
+}
+
+.divider {
+  width: 100%;
+  max-width: 480px;
+  height: 1px;
+  background-color: rgba($color-white, 0.2);
+  margin-top: $space-8;
+}
