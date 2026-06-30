@@ -1,0 +1,103 @@
+.card {
+  background-color: $color-white;
+  border-radius: $radius-sm;
+  box-shadow: $shadow-sm;
+  overflow: hidden;
+}
+
+/* ── Nav header ── */
+
+.navHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $space-3 $space-4;
+  border-bottom: 1px solid $color-gray-100;
+}
+
+.navLeft {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+}
+
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: $space-1;
+}
+
+.navArrow {
+  background: none;
+  border: none;
+  padding: $space-1 $space-2;
+  font-size: $font-size-xl;
+  color: $color-gray-500;
+  cursor: pointer;
+  line-height: 1;
+  border-radius: $radius-sm;
+  transition: color $transition-fast, background-color $transition-fast;
+
+  &:hover:not(:disabled) {
+    color: $color-gray-900;
+    background-color: $color-gray-50;
+  }
+
+  &:disabled {
+    color: $color-gray-200;
+    cursor: default;
+  }
+}
+
+.ticketIdWrapper {
+  display: flex;
+  align-items: center;
+  gap: $space-1;
+}
+
+.ticketIdLabel {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-gray-700;
+}
+
+.ticketSelect {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-gray-900;
+  background: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 0 $space-1;
+  font-family: inherit;
+
+  &:focus-visible {
+    @include focus-ring;
+    border-radius: $radius-sm;
+  }
+}
+
+/* ── Two-column body ── */
+
+.body {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  min-height: 420px;
+}
+
+.leftPanel {
+  padding: $space-4;
+  overflow-y: auto;
+}
+
+.divider {
+  background-color: $color-gray-100;
+}
+
+.rightPanel {
+  padding: $space-4;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}

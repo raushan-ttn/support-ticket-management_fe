@@ -1,0 +1,58 @@
+.page {
+  padding: $space-5 $space-6;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ── Page header ── */
+
+.pageHeader {
+  @include flex-between;
+  align-items: center;
+  margin-bottom: $space-5;
+}
+
+.pageTitle {
+  margin: 0;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-gray-900;
+}
+
+.durationWrapper {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+}
+
+.durationLabel {
+  font-size: $font-size-sm;
+  color: $color-gray-500;
+}
+
+.durationSelect {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-gray-900;
+  background: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0 $space-1;
+
+  &:focus-visible {
+    @include focus-ring;
+    border-radius: $radius-sm;
+  }
+}
+
+/* ── Empty state ── */
+
+.empty {
+  margin: $space-8 auto;
+  font-size: $font-size-sm;
+  color: $color-gray-400;
+  text-align: center;
+}

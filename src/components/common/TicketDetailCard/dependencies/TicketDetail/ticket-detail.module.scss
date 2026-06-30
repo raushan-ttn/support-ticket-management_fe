@@ -1,0 +1,55 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+  height: 100%;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: $space-2;
+  align-items: baseline;
+}
+
+.label {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-gray-500;
+  flex-shrink: 0;
+}
+
+.value {
+  font-size: $font-size-sm;
+  color: $color-gray-900;
+}
+
+.description {
+  margin: 0;
+  font-size: $font-size-sm;
+  color: $color-gray-700;
+  line-height: 1.6;
+}
+
+.actionables {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+  padding-top: $space-4;
+  border-top: 1px solid $color-gray-100;
+}
+
+.actionablesHeading {
+  margin: 0 0 $space-1;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $color-gray-400;
+}
