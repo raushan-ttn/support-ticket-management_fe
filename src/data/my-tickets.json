@@ -1,11 +1,68 @@
 {
-  "stats": { "open": 0, "inProgress": 0, "closed": 2 },
+  "stats": { "open": 3, "inProgress": 4, "closed": 3 },
   "duration": "Last 6 Months",
   "tickets": [
+    {
+      "id": 68001,
+      "category": "IT Support",
+      "title": "Laptop not connecting to VPN",
+      "description": "My laptop is unable to establish a VPN connection since this morning. The VPN client throws an authentication timeout error. I have already tried restarting the machine and reinstalling the client but the issue persists.",
+      "status": "open",
+      "createdAt": "2026-06-20T09:00:00.000Z"
+    },
+    {
+      "id": 68002,
+      "category": "HR",
+      "title": "Leave balance discrepancy",
+      "description": "My leave balance in the HR portal is showing 4 days of casual leave, but as per my records I should have 8 days remaining. Kindly reconcile the balance and correct it at the earliest.",
+      "status": "open",
+      "createdAt": "2026-06-18T11:30:00.000Z"
+    },
+    {
+      "id": 68003,
+      "category": "Payroll",
+      "title": "Salary not credited for May",
+      "description": "My May 2026 salary has not been credited to my bank account as of today. The usual credit date is the 5th of each month. Requesting immediate investigation and resolution.",
+      "status": "open",
+      "createdAt": "2026-06-15T08:00:00.000Z"
+    },
+    {
+      "id": 67980,
+      "category": "IT Support",
+      "title": "Email access not working",
+      "description": "I am unable to log in to my official email account. The Outlook app shows 'Cannot connect to server' and webmail login fails with a password error. This is blocking daily communication.",
+      "status": "inProgress",
+      "createdAt": "2026-06-10T14:00:00.000Z"
+    },
+    {
+      "id": 67970,
+      "category": "Admin",
+      "title": "ID card replacement request",
+      "description": "My employee ID card was damaged and is no longer scannable at the entry gate. I need a replacement card issued. Submitting this request along with a passport-size photograph.",
+      "status": "inProgress",
+      "createdAt": "2026-06-08T10:00:00.000Z"
+    },
+    {
+      "id": 67960,
+      "category": "Finance",
+      "title": "Reimbursement pending approval",
+      "description": "Travel reimbursement claim of ₹4,200 submitted on 28 May 2026 for the Mumbai client visit is still pending manager approval. Requesting escalation as it has exceeded the 10-day SLA.",
+      "status": "inProgress",
+      "createdAt": "2026-06-05T09:30:00.000Z"
+    },
+    {
+      "id": 67950,
+      "category": "Office Facilities",
+      "title": "AC not working in bay 3",
+      "description": "The central air conditioning unit in bay 3 (3rd floor) has stopped functioning since 1st June. The temperature is affecting team productivity. Requesting urgent maintenance check.",
+      "status": "inProgress",
+      "createdAt": "2026-06-01T08:00:00.000Z"
+    },
     {
       "id": 67851,
       "category": "PF",
       "title": "Claim submitted for advance payment",
+      "description": "PF advance claim for medical emergency submitted through the EPFO portal on 10 March 2026. Claim reference number: PF/ADV/2026/00431. Request has been processed and amount disbursed.",
       "status": "closed",
       "createdAt": "2026-03-18T12:03:00.000Z"
     },
@@ -13,8 +70,17 @@
       "id": 67773,
       "category": "Office Facilities",
       "title": "Bike parking sticker request",
+      "description": "Requested a parking sticker for my two-wheeler (registration: MH12AB1234) for the basement parking area. Sticker has been issued and handed over.",
       "status": "closed",
       "createdAt": "2026-03-13T10:00:00.000Z"
+    },
+    {
+      "id": 67720,
+      "category": "HR",
+      "title": "Confirmation letter request",
+      "description": "Requested an employment confirmation letter for bank loan processing. The letter should include designation, date of joining, and current CTC. Document has been generated and shared over email.",
+      "status": "closed",
+      "createdAt": "2026-02-28T09:00:00.000Z"
     }
   ]
 }

@@ -1,39 +1,30 @@
+import StatCard from '@/components/common/StatCard';
 import styles from './ticket-stats.module.scss';
-
-type StatFilter = 'open' | 'inProgress' | 'closed';
-
-interface Stats {
-  readonly open: number;
-  readonly inProgress: number;
-  readonly closed: number;
-}
+import { TICKET_STATUS, type TicketStatus, type TicketStats } from '@/types/ticket';
 
 interface TicketStatsProps {
-  readonly stats: Stats;
-  readonly active: StatFilter;
-  readonly onSelect: (filter: StatFilter) => void;
+  readonly stats: TicketStats;
+  readonly active?: TicketStatus;
+  readonly onSelect: (status: TicketStatus) => void;
 }
 
-const STAT_CARDS: { key: StatFilter; label: string }[] = [
-  { key: 'open', label: 'Open Tickets' },
-  { key: 'inProgress', label: 'In-Progress Tickets' },
-  { key: 'closed', label: 'Closed Tickets' },
+const STAT_CARDS: { key: TicketStatus; label: string }[] = [
+  { key: TICKET_STATUS.OPEN, label: 'Open Tickets' },
+  { key: TICKET_STATUS.IN_PROGRESS, label: 'In-Progress Tickets' },
+  { key: TICKET_STATUS.CLOSED, label: 'Closed Tickets' },
 ];
 
 export default function TicketStats({ stats, active, onSelect }: TicketStatsProps) {
   return (
     <div className={styles.row}>
       {STAT_CARDS.map(({ key, label }) => (
-        <button
+        <StatCard
           key={key}
-          type="button"
-          className={`${styles.card} ${active === key ? styles.cardActive : ''}`}
+          count={stats[key]}
+          label={label}
+          isActive={active === key}
           onClick={() => onSelect(key)}
-          aria-pressed={active === key}
-        >
-          <span className={styles.count}>{stats[key]}</span>
-          <span className={styles.label}>{label}</span>
-        </button>
+        />
       ))}
     </div>
   );
