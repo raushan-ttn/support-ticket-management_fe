@@ -5,29 +5,40 @@ import { useRouter } from 'next/navigation';
 import StatCard from '@/components/common/StatCard';
 import TicketListItem from '@/components/common/TicketListItem';
 import mockData from '@/data/my-tickets.json';
+import { TICKET_STATUS, TICKET_STATUS_SLUG, toTicketStatus, type TicketStatus } from '@/types/ticket';
 import styles from './TicketsPage.module.scss';
 
-type StatFilter = 'open' | 'inProgress' | 'closed';
+interface TicketsPageProps {
+  readonly statusFilter?: TicketStatus;
+}
 
 const DURATION_OPTIONS = ['Last 1 Month', 'Last 3 Months', 'Last 6 Months', 'Last 1 Year'];
 
-const STAT_CARDS: { key: StatFilter; label: string }[] = [
-  { key: 'open', label: 'Open Tickets' },
-  { key: 'inProgress', label: 'In-Progress Tickets' },
-  { key: 'closed', label: 'Closed Tickets' },
+const STAT_CARDS: { key: TicketStatus; label: string }[] = [
+  { key: TICKET_STATUS.OPEN, label: 'Open Tickets' },
+  { key: TICKET_STATUS.IN_PROGRESS, label: 'In-Progress Tickets' },
+  { key: TICKET_STATUS.CLOSED, label: 'Closed Tickets' },
 ];
 
-export default function TicketsPage() {
+export default function TicketsPage({ statusFilter }: TicketsPageProps) {
   const router = useRouter();
-  const [activeFilter, setActiveFilter] = useState<StatFilter>('closed');
   const [searchTerm, setSearchTerm] = useState('');
   const [duration, setDuration] = useState(mockData.duration);
 
   const filteredTickets = mockData.tickets.filter((ticket) => {
-    const matchesFilter = ticket.status === activeFilter;
+    const ticketStatus = toTicketStatus(ticket.status);
+    const matchesFilter = statusFilter ? ticketStatus === statusFilter : true;
     const matchesSearch = ticket.title.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
   });
+
+  function handleStatCardClick(key: TicketStatus) {
+    if (statusFilter === key) {
+      router.push('/tickets'); // toggle off → show all
+    } else {
+      router.push(`/tickets/status/${TICKET_STATUS_SLUG[key]}`); // navigate to filtered URL
+    }
+  }
 
   return (
     <div className={styles.page}>
@@ -68,8 +79,8 @@ export default function TicketsPage() {
             key={key}
             count={mockData.stats[key]}
             label={label}
-            isActive={activeFilter === key}
-            onClick={() => setActiveFilter(key)}
+            isActive={statusFilter === key}
+            onClick={() => handleStatCardClick(key)}
           />
         ))}
       </div>
