@@ -51,8 +51,15 @@ export interface Comment {
 ```typescript
 import { cookies } from 'next/headers';
 
-const COOKIE_NAME = 'token';
-const COOKIE_OPTIONS = { httpOnly: true, path: '/', sameSite: 'strict' } as const;
+const COOKIE_NAME = 'authToken';
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  path: '/',
+  sameSite: 'strict' as const,
+  maxAge: 60 * 60,
+  priority: 'high' as const,
+} as const;
 
 export async function setAuthCookie(token: string): Promise<void> { /* ... */ }
 export async function getAuthCookie(): Promise<string | undefined> { /* ... */ }

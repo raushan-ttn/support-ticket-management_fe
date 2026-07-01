@@ -51,7 +51,7 @@ LoginForm → useLoginMutation
   → dispatch setCredentials(user) → router.push('/tickets')
   → AuthWrapper reads cookie → renders protected page
 ```
-If 401: check DevTools → Application → Cookies → `token` (httpOnly — not readable by JS, but should be listed).
+If 401: check DevTools → Application → Cookies → `authToken` (httpOnly — not readable by JS, but should be listed).
 
 **Server path** (RSC):
 ```
