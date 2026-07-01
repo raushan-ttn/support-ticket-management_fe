@@ -1,15 +1,15 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useDispatch } from 'react-redux';
-import { Alert, Button, Stack, TextField } from '@mui/material';
-import { useLoginMutation } from '@/services/auth-api';
-import { setCredentials } from '@/lib/store/authSlice';
-import type { AppDispatch } from '@/lib/store';
-import { loginSchema, type LoginPayload } from '@/types/auth';
 import { TtnLogoIcon } from '@/components/common/globalSvg';
+import type { AppDispatch } from '@/lib/store';
+import { setCredentials } from '@/lib/store/authSlice';
+import { useLoginMutation } from '@/services/auth-api';
+import { loginSchema, type LoginPayload } from '@/types/auth';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Alert, Button, Stack, TextField } from '@mui/material';
+import { useRouter } from 'next/navigation';
+import { Controller, useForm } from 'react-hook-form';
+import { useDispatch } from 'react-redux';
 import styles from './login-form.module.scss';
 
 export default function LoginForm() {
@@ -30,8 +30,12 @@ export default function LoginForm() {
   async function onSubmit(values: LoginPayload) {
     try {
       const data = await login(values).unwrap();
-      dispatch(setCredentials(data.user));
-      router.push('/tickets');
+      if (data?.user) {
+        dispatch(setCredentials(data.user));
+        router.push('/tickets');
+      } else {
+        setError('root', { message: 'Login response missing user data' });
+      }
     } catch (error) {
       const status =
         typeof error === 'object' && error !== null && 'status' in error
@@ -43,10 +47,7 @@ export default function LoginForm() {
           : 'Invalid credentials';
 
       setError('root', {
-        message:
-          status === 429
-            ? 'Too many login attempts. Please try again later.'
-            : message,
+        message: status === 429 ? 'Too many login attempts. Please try again later.' : message,
       });
     }
   }
@@ -62,7 +63,7 @@ export default function LoginForm() {
       </div>
 
       <div className={styles.card}>
-        <h1 className={styles.heading}>TO THE NEW Growth App Login</h1>
+        <h1 className={styles.heading}>Ticket Management System Login</h1>
         <p className={styles.subtitle}>
           Use your TO THE NEW email address and password to sign in.
         </p>

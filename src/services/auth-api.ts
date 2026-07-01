@@ -12,10 +12,31 @@ export const authApi = baseApi.injectEndpoints({
         body,
         skipAuth: true,
       }),
+      transformResponse: (response: unknown): LoginResponse => {
+        if (!response || typeof response !== 'object') {
+          return response as unknown as LoginResponse;
+        }
+        let candidate = response as Record<string, unknown>;
+        // Peel up to two levels of { data: ... } envelope (handles backends that return
+        // { data: { token, user } } even when sibling keys prevent the tmsFetch parse unwrap,
+        // or double-wrapped responses).
+        for (let i = 0; i < 2; i += 1) {
+          const inner = candidate.data;
+          if (inner && typeof inner === 'object') {
+            candidate = inner as Record<string, unknown>;
+          } else {
+            break;
+          }
+        }
+        return candidate as unknown as LoginResponse;
+      },
       async onQueryStarted(_arg, { queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          await setAuthCookieAction(data.token);
+          const token = (data as Partial<LoginResponse> | undefined)?.token;
+          if (token) {
+            await setAuthCookieAction(token);
+          }
         } catch {
           // Login failed — cookie is not set.
         }

@@ -11,6 +11,9 @@ const COOKIE_OPTIONS = {
 };
 
 export async function setAuthCookie(token: string): Promise<void> {
+  if (typeof token !== 'string' || token.length === 0) {
+    return;
+  }
   (await cookies()).set(COOKIE_NAME, token, COOKIE_OPTIONS);
 }
 
